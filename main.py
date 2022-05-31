@@ -36,8 +36,8 @@ def main():
             print(ee)
         
         try:
-            gmail.saveMessagePayloadToFolder(folder = '%s/results' % dirname(__file__), msg = real_message, overwrite=False)
-            print("message %s payload saved" % msg['id'])
+            gmail.saveMessagePartsByMimeTypeToFolder(folder = '%s/results' % dirname(__file__), msg = real_message, mimetype = 'text/html', overwrite=False)
+            print("message %s payload parts saved" % msg['id'])
         except FileExistsError as e:
             print("payload file error")
             print(e)
