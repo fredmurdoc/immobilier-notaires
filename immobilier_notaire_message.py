@@ -11,18 +11,13 @@ class ImmobilierNotairesMessageXpathFinderV1():
     ITEMS_PARENT_TAG_TR = '//tr[./td/div/table/tr/td/a[contains(@href, "https://www.immobilier.notaires.fr/")]/img]'
     ITEM_IMAGE = './/img'
     ITEM_URL = './/a'
-    ITEM_DETAIL_PARENT_TAG = './div/table/tr/td/table'
-    ITEM_INTITULE = './td[2]/a/span[1]'
-    ITEM_PRIX = './td[2]/a/span[2]'
-    ITEM_COMMUNE = './td[2]/a/div/span[1]'
-    ITEM_NB_PIECES = './td[2]/a/div/span[1]'
-    ITEM_SURFACE = './td[2]/a/div/span[1]'
-    ITEM_AUTRES = './td[2]/a/div/span[1]'
-
+    ITEM_DETAIL_PARENT_TAG = './td/div/table/tr/td/table'
+    ITEM_DETAIL = './/span'
+    
 class ImmobilierNotairesMessage:
-    REGEXP_SUPERFICIE = r'.+\s+(?P<superficie>[0-9]+)\s+m\u00b2.*'
+    REGEXP_SUPERFICIE = r'\s*(?P<superficie>[0-9]+)\s+m\u00b2.*'
     REGEXP_NBPIECES= r'.+\s+(?P<nb_pieces>[0-9]+)\s+pièce.\s+.*'
-    REGEXP_COMMUNE_CP= r'\s*(?P<commune>[^0-9]+)\s+(?P<cp>[0-9]{5})\s*'
+    REGEXP_COMMUNE_DEPARTEMENT= r'\s*(?P<commune>[^0-9]+)\s+\((?P<cp>[0-9]{2})\)\s*'
     def __init__(self):
         self.finder = None
         self.date = None
@@ -36,7 +31,7 @@ class ImmobilierNotairesMessage:
     def loadFromString(self, payload):
         soup = BeautifulSoup(payload, "html.parser")
         self.dom = etree.HTML(str(soup))
-        logging.debug(etree.tostring(self.dom))
+        #logging.debug(etree.tostring(self.dom))
     
     def _find_search_items(self):
         results = self.dom.xpath(ImmobilierNotairesMessageXpathFinderV1.ITEMS_PARENT_TAG_TR)
@@ -53,42 +48,46 @@ class ImmobilierNotairesMessage:
         
         return results[1:]
 
+    def _find_detail_element(self, parent_item):
+        element = parent_item.find(self.finder.ITEM_DETAIL_PARENT_TAG)
+        return element
+
     def _find_search_item_url(self, parent_item):
         element = parent_item.find(self.finder.ITEM_URL)
         return element.attrib['href'] if element is not None else None
 
     def _find_search_item_superficie(self, parent_item):
-        description = self._find_search_ITEM_INTITULE(parent_item)
-        if description is None:
+        element = parent_item.xpath(self.finder.ITEM_DETAIL)[3]
+        if element is None:
             return None
-        m = re.search(self.REGEXP_SUPERFICIE, description)
+        m = re.search(self.REGEXP_SUPERFICIE, element.text)
         return int(m.group('superficie')) if m is not None else None
 
-    def _find_search_item_nb_pieces(self, parent_item):
-        description = self._find_search_ITEM_INTITULE(parent_item)
-        if description is None:
+    def _find_search_item_superficie_terrain(self, parent_item):
+        element = parent_item.xpath(self.finder.ITEM_DETAIL)[5]
+        if element is None:
             return None
-        m = re.search(self.REGEXP_NBPIECES, description)
-        return int(m.group('nb_pieces')) if m is not None else None
+        m = re.search(self.REGEXP_SUPERFICIE, element.text)
+        return int(m.group('superficie')) if m is not None else None
 
-
+    
     def _find_search_ITEM_INTITULE(self, parent_item):
-        element = parent_item.find(self.finder.ITEM_INTITULE)
+        element = parent_item.xpath(self.finder.ITEM_DETAIL)[0]
         return element.text if element is not None else None
 
     def _find_search_item_prix(self, parent_item):
-        element = parent_item.find(self.finder.ITEM_PRIX)
-        return int(element.text.split(' ')[0]) if element is not None else None
+        element = parent_item.xpath(self.finder.ITEM_DETAIL)[1]
+        return int(element.text.replace(' ', '').replace('€','')) if element is not None else None
 
-    def _find_search_item_commune_cp(self, parent_item):
-        element = parent_item.find(self.finder.ITEM_COMMUNE)
+    def _find_search_item_commune_departement(self, parent_item):
+        element = parent_item.xpath(self.finder.ITEM_DETAIL)[2]
         return element.text if element is not None else None
 
     def _find_search_item_commune(self, parent_item):
-        com_cp = self._find_search_item_commune_cp(parent_item)
+        com_cp = self._find_search_item_commune_departement(parent_item)
         if com_cp is None:
             return None
-        m = re.search(self.REGEXP_COMMUNE_CP, com_cp)
+        m = re.search(self.REGEXP_COMMUNE_DEPARTEMENT, com_cp)
         return m.group('commune') if m is not None else None
 
     def _find_search_item_commune_codepostal(self, parent_item):
