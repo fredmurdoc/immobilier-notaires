@@ -2,7 +2,7 @@ import os
 from posixpath import dirname
 import json
 from datetime import datetime
-from immobilier_notaire_message import LbcMessage
+from immobilier_notaire_message import ImmobilierNotairesMessage
 
 def extract_items():
     url_annonces = {}
@@ -17,10 +17,10 @@ def extract_items():
             #get payload file
             print('analyze payload file %s' % payload_file)
             #analyse it
-            lbc_msg = LbcMessage()
-            lbc_msg.loadFromFile(f)
+            msg = ImmobilierNotairesMessage()
+            msg.loadFromFile(f)
             try:
-                extracted = lbc_msg.extract_items()
+                extracted = msg.extract_items()
                 json_content.extend(extracted)
             except Exception as e:
                 print(e)    

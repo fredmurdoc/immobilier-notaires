@@ -90,14 +90,7 @@ class ImmobilierNotairesMessage:
         m = re.search(self.REGEXP_COMMUNE_DEPARTEMENT, com_cp)
         return m.group('commune') if m is not None else None
 
-    def _find_search_item_commune_codepostal(self, parent_item):
-        com_cp = self._find_search_item_commune_cp(parent_item)
-        if com_cp is None:
-            return None
-        m = re.search(self.REGEXP_COMMUNE_CP, com_cp)
-        return m.group('cp') if m is not None else None
-
-
+   
     def _find_search_item_image_url(self, parent_item):
         element =  parent_item.find(self.finder.ITEM_IMAGE)
         return element.attrib['src']
@@ -111,10 +104,10 @@ class ImmobilierNotairesMessage:
         'prix' : self._find_search_item_prix(parent_item),
         'intitule' : self._find_search_ITEM_INTITULE(parent_item),
         'commune' : self._find_search_item_commune(parent_item),
-        'code_postal' : self._find_search_item_commune_codepostal(parent_item),
+        'code_postal' : None,
         'image_url' : self._find_search_item_image_url(parent_item),
         'superficie' : self._find_search_item_superficie(parent_item),
-        'nb_pieces' : self._find_search_item_nb_pieces(parent_item)
+        'nb_pieces' : None
         }
     
     def extract_items(self):
