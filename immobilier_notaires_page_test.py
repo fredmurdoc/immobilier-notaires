@@ -10,6 +10,9 @@ logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 class TestImmobilierNotairesPage(unittest.TestCase):
     PAGE_V1='tests/page_v1.html'
     URL_V1 = 'https://www.immobilier.notaires.fr/fr/annonce-immo-detail/?idAnnonce=1478994&utm_source=alert&utm_medium=email&utm_campaign=annonces'
+    
+    URL_V1 = 'https://www.immobilier.notaires.fr/fr/annonce-immo-detail/?idAnnonce=1607345&utm_source=alert&utm_medium=email&utm_campaign=annonces'
+    
     IMG_URL_V1 = 'https://media.immobilier.notaires.fr/inotr/media/29/44051/1478994/137da42e_QQVGA.jpg'
     DESC_V1 = 'Maison / villa'
     PRIX_V1=58750
